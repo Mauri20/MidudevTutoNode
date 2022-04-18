@@ -1,0 +1,27 @@
+{
+  "name": "midudevtutonode",
+  "version": "1.0.0",
+  "description": "Tutorial de NodeJs y express",
+  "main": "index.js",
+  "scripts": {
+    "dev":"nodemon index.js",
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mauri20/MidudevTutoNode.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mauri20/MidudevTutoNode/issues"
+  },
+  "homepage": "https://github.com/Mauri20/MidudevTutoNode#readme",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "express": "^4.17.3",
+    "mongoose": "^6.3.0",
+    "nodemon": "^2.0.15"
+  }
+}
