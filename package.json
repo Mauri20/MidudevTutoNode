@@ -4,7 +4,7 @@
   "description": "Tutorial de NodeJs y express",
   "main": "index.js",
   "scripts": {
-    "dev":"nodemon index.js",
+    "dev": "nodemon index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,9 +19,13 @@
   },
   "homepage": "https://github.com/Mauri20/MidudevTutoNode#readme",
   "dependencies": {
-    "colors": "^1.4.0",
-    "express": "^4.17.3",
-    "mongoose": "^6.3.0",
-    "nodemon": "^2.0.15"
+    "colors": "1.4.0",
+    "cors": "^2.8.5",
+    "express": "4.17.3",
+    "mongoose": "6.3.0",
+    "nodemon": "2.0.15"
+  },
+  "devDependencies": {
+    "eslint": "8.13.0"
   }
 }

@@ -1,9 +1,14 @@
 const express = require("express");
-const res = require("express/lib/response");
 require("colors");
+const logger = require("./loggerMiddleware");
+//Para que mi api sea publica a cualquier dominio
+const cors = require("cors");
 
 const app = express();
+//Middlewares
 app.use(express.json());
+app.use(cors());
+app.use(logger);
 
 const date = new Date();
 
@@ -51,7 +56,6 @@ app.post("/api/notes", (request, response) => {
     return response.status(400).json({
       error: "note content is missing",
     });
-  } else {
   }
   const ids = notes.map((note) => note.id);
   const maxId = Math.max(...ids);
@@ -69,6 +73,15 @@ app.delete("/api/notes/:id", (request, response) => {
   const id = request.params.id;
   notes = notes.filter((note) => note.id != id);
   response.json(notes);
+});
+
+//Middleware que controla el 404
+app.use((req, res, next) => {
+  console.log(req.path);
+  res.status(404).json({
+    error: "Página no encontrada",
+  });
+  next();
 });
 
 const PORT = 3001;
