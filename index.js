@@ -1,8 +1,14 @@
+require("dotenv").config();
+require("./mongo");
 const express = require("express");
 require("colors");
 const logger = require("./loggerMiddleware");
+const Note = require("./models/Note");
+
 //Para que mi api sea publica a cualquier dominio
 const cors = require("cors");
+const NotFound = require("./middlewares/NotFound");
+const HandleErrors = require("./middlewares/HandleErrors");
 
 const app = express();
 //Middlewares
@@ -10,44 +16,29 @@ app.use(express.json());
 app.use(cors());
 app.use(logger);
 
-const date = new Date();
-
-let notes = [
-  {
-    id: 1,
-    content: "Contenido de la nota 1",
-    date: date.toLocaleDateString(),
-    important: true,
-  },
-  {
-    id: 2,
-    content: "Contenido de la nota 2",
-    date: date.toLocaleDateString(),
-    important: true,
-  },
-  {
-    id: 3,
-    content: "Contenido de la nota 3",
-    date: date.toLocaleDateString(),
-    important: true,
-  },
-];
-
+//Routes
 app.get("/", (request, response) => {
   response.send("Holiiiiis");
 });
 
 app.get("/api/notes", (request, response) => {
-  response.json(notes);
+  Note.find({}).then((notes) => {
+    response.json(notes);
+  });
 });
-app.get("/api/notes/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const note = notes.find((note) => note.id === id);
-  if (note) {
-    response.json(note);
-  } else {
-    response.status(404).end();
-  }
+app.get("/api/notes/:id", (request, response, next) => {
+  const { id } = request.params;
+  Note.findById(id)
+    .then((note) => {
+      if (note) {
+        response.json(note);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
 app.post("/api/notes", (request, response) => {
@@ -57,34 +48,42 @@ app.post("/api/notes", (request, response) => {
       error: "note content is missing",
     });
   }
-  const ids = notes.map((note) => note.id);
-  const maxId = Math.max(...ids);
-  const newNote = {
-    id: maxId + 1,
+  const newNote = Note({
     content: note.content,
-    date: date.toISOString(),
+    date: new Date(),
     important: typeof note.important != "undefined" ? note.important : false,
-  };
-  notes = [...notes, newNote];
-  response.json(newNote);
+  });
+  newNote.save().then((savedNote) => {
+    response.json(savedNote);
+  });
 });
-
-app.delete("/api/notes/:id", (request, response) => {
-  const id = request.params.id;
-  notes = notes.filter((note) => note.id != id);
-  response.json(notes);
+app.put("/api/notes/:id", (request, response, next) => {
+  const { id } = request.params;
+  const note = request.body;
+  const newNoteUpdate = {
+    content: note.content,
+    important: note.important,
+  };
+  Note.findByIdAndUpdate(id, newNoteUpdate, { new: true })
+    .then((result) => {
+      response.status(200).json(result);
+    })
+    .catch((error) => next(error));
+});
+app.delete("/api/notes/:id", (request, response, next) => {
+  const { id } = request.params;
+  Note.findByIdAndDelete(id)
+    .then((result) => {
+      response.status(204).json(result).end();
+    })
+    .catch((error) => next(error));
 });
 
 //Middleware que controla el 404
-app.use((req, res, next) => {
-  console.log(req.path);
-  res.status(404).json({
-    error: "Página no encontrada",
-  });
-  next();
-});
+app.use(NotFound);
+app.use(HandleErrors);
 
-const PORT = 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log("Server running on port ".cyan, PORT);
 });
